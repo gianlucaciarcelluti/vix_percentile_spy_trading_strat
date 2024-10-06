@@ -6,9 +6,9 @@ import requests
 # User-configurable settings
 # ==========================
 # Define the VIX percentile threshold for the Long strategy
-VIX_THRESHOLD = 50  # Values below this percentile are considered for Long
+VIX_THRESHOLD = 44  # Values below this percentile are considered for Long
 # Define the lookback period for VIX percentile calculation
-LOOKBACK_DAYS = 20
+LOOKBACK_DAYS = 11
 # ==========================
 
 # Load API keys from JSON file
