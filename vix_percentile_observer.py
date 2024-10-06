@@ -14,10 +14,8 @@ with open(CONFIG_PATH, "r") as file:
 
 fred = Fred(api_key=FRED_API_KEY)
 
-
 def fetch_vix_data():
     return fred.get_series("VIXCLS")
-
 
 def calculate_vix_percentile(vix_data):
     # Fill gaps using interpolation
@@ -26,7 +24,6 @@ def calculate_vix_percentile(vix_data):
     return vix_data_filled.rolling(window=LOOKBACK_PERIOD).apply(
         lambda x: (x.rank(pct=True).iloc[-1]) * 100
     )
-
 
 def plot_vix_percentile(vix_percentile):
     plt.figure(figsize=(14, 7))
@@ -54,7 +51,6 @@ def plot_vix_percentile(vix_percentile):
     )
 
     plt.show()
-
 
 if __name__ == "__main__":
     vix_data = fetch_vix_data()
