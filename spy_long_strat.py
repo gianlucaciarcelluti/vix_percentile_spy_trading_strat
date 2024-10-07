@@ -1,3 +1,4 @@
+import datetime
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -145,6 +146,61 @@ plt.annotate(
     color="blue",
 )
 
+plt.tight_layout()
+plt.show()
+
+# ==================
+# Last Year S&P 500 with Blue and Red Positions Chart
+# ==================
+# Get today's date and one year ago
+one_year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
+
+# Filter the data for the last year
+aligned_data_last_year = aligned_data[aligned_data.index >= one_year_ago]
+
+# Plot the last year's S&P 500 data with color change based on VIX percentile
+plt.figure(figsize=(14, 7))
+
+# Plot the entire last year of S&P 500 data as red lines
+plt.plot(
+    aligned_data_last_year.index,
+    aligned_data_last_year["value"],
+    linestyle="-",
+    color="red",
+)
+
+# Filter out sequences where VIX is below the threshold and overlay them with blue lines
+is_below_threshold_last_year = aligned_data_last_year["Rolling Percentile"] < VIX_THRESHOLD
+start_date = None
+for date, below in is_below_threshold_last_year.items():
+    if below and start_date is None:
+        start_date = date
+    elif not below and start_date:
+        plt.plot(
+            aligned_data_last_year[start_date:date].index,
+            aligned_data_last_year[start_date:date]["value"],
+            marker="o",
+            markersize=1,
+            color="blue",
+            linestyle="-",
+        )
+        start_date = None
+
+# Handle the case where the last sequence goes till the end of the dataset
+if start_date:
+    plt.plot(
+        aligned_data_last_year[start_date:].index,
+        aligned_data_last_year[start_date:]["value"],
+        marker="o",
+        markersize=1,
+        color="blue",
+        linestyle="-",
+    )
+
+plt.title("S&P 500 (Last Year) with Color Change based on VIX Percentile")
+plt.xlabel("Date")
+plt.ylabel("S&P 500 Price")
+plt.grid(True)
 plt.tight_layout()
 plt.show()
 
