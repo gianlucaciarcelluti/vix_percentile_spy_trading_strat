@@ -14,7 +14,7 @@ def plot_combined_payoff_chart():
     vix_premium = 0.5
     vix_multiplier = 2
     initial_vix_price = 20
-    stock_prices = np.linspace(4500, 6000, 100)
+    stock_prices = np.linspace(4700, 6000, 100)
     
     mes_payoffs = payoff_short_put(mes_strike_price, mes_premium, stock_prices)
     vix_prices = initial_vix_price + (5800 - stock_prices) * (20 / 580)  # Assuming VIX increases 20 points for each 10% MES decrease
@@ -34,18 +34,21 @@ def plot_combined_payoff_chart():
     plt.annotate(f'Max Loss: {max_loss:.2f}\nStock Price: {max_loss_stock_price:.2f}', 
                  xy=(max_loss_stock_price, max_loss), xytext=(max_loss_stock_price, max_loss - 1000),
                  arrowprops=dict(facecolor='red', shrink=0.05), fontsize=12, color='red')
-    
-    breakeven_index = np.nonzero(np.isclose(combined_payoffs[::-1], 0.0))[0]
-    
-    # Print each stock price value for breakeven indices
-    for index in breakeven_index:
-        print(f'Breakeven index: {index}, Stock Price: {stock_prices[index]:.2f}, Combined Payoff: {combined_payoffs[index]:.2f}')
 
-    if breakeven_index.size > 0:
-        breakeven_price = stock_prices[breakeven_index.size]
-        plt.annotate(f'Breakeven: {breakeven_price:.2f}', 
-                     xy=(breakeven_price, 0), xytext=(breakeven_price, 1000),
-                     arrowprops=dict(facecolor='blue', shrink=0.05), fontsize=12, color='blue')
+    breakeven_price = None
+    # ciclo combined_payoffs per trovare il valore più vicino allo 0 e ritorno l'indice
+    #scrivi un ciclo for che incrementa il valore di index
+    max_index = len(combined_payoffs)
+    for index in range(0, len(combined_payoffs) - 1):
+        minimum_payoff = 9999;
+        # se la differenza con la prossima payoff è minore di 1, allora è il punto di breakeven
+        if combined_payoffs[index] < minimum_payoff and combined_payoffs[index] > 0:
+            minimum_payoff = np.abs(combined_payoffs[index])
+            breakeven_price = stock_prices[index]
+    
+    plt.annotate(f'Breakeven: {breakeven_price:.2f}', 
+                         xy=(breakeven_price, 0), xytext=(breakeven_price, 1000),
+                         arrowprops=dict(facecolor='blue', shrink=0.05), fontsize=12, color='blue')
     
     plt.title('Payoff Chart for Short Put on MES and Long Calls on VIX')
     plt.xlabel('MES Stock Price at Expiration')
