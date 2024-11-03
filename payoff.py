@@ -13,7 +13,7 @@ def payoff_short_call(strike_price, premium, stock_price, multiplier=100):
 def plot_combined_payoff_chart():
     mes_strike_price = 5800
     mes_premium = 20
-    vix_long_call_strike_price = 28
+    vix_long_call_strike_price = 30
     vix_long_call_premium = 0.6
     vix_short_call_strike_price = 70
     vix_short_call_premium = 0.1
@@ -48,14 +48,24 @@ def plot_combined_payoff_chart():
                  arrowprops=dict(facecolor='red', shrink=0.05), fontsize=12, color='red')
 
     breakeven_price = None
+    last_call_price = None
+    minimum_payoff = 9999
+    last_call = 9999
     for index in range(0, len(combined_payoffs) - 1):
-        minimum_payoff = 9999
         if combined_payoffs[index] < minimum_payoff and combined_payoffs[index] > 0:
             breakeven_price = stock_prices[index]
+
+    for index in range(0, len(combined_payoffs) - 1):
+        if stock_prices[index] < breakeven_price  and combined_payoffs[index] < 0:
+            last_call_price = stock_prices[index]
     
     plt.annotate(f'Breakeven: {breakeven_price:.2f}', 
                  xy=(breakeven_price, 0), xytext=(breakeven_price, 1000),
                  arrowprops=dict(facecolor='blue', shrink=0.05), fontsize=12, color='blue')
+    plt.annotate(f'Last call: {last_call_price:.2f}', 
+                 xy=(last_call_price, 0), xytext=(last_call_price, -1400),
+                 arrowprops=dict(facecolor='blue', shrink=0.05), 
+                 fontsize=12, color='blue')
     
     plt.title('Cassandra\'s Strategy - Initial Capital: ' + str(initial_capital))
     plt.xlabel('MES Stock Price at Expiration')
