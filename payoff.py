@@ -32,8 +32,8 @@ def plot_combined_payoff_chart():
 
     plt.figure(figsize=(10, 6))
     plt.plot(stock_prices, mes_payoffs, label='Short Put on MES @ ' + str(mes_strike_price))
-    plt.plot(stock_prices, combined_vix_payoffs, label=str(vix_multiplier) + ' x Bear Call VIX @ ' + str(vix_long_call_strike_price) + "/" + str(vix_short_call_strike_price), color='orange')
-    plt.plot(stock_prices, combined_payoffs, label='Combined', color='green')
+    plt.plot(stock_prices, combined_vix_payoffs, label=str(vix_multiplier) + ' x Bull Call VIX @ ' + str(vix_long_call_strike_price) + "/" + str(vix_short_call_strike_price), color='orange')
+    plt.plot(stock_prices, combined_payoffs, label='Combined Payoff', color='green')
     plt.axhline(0, color='black', lw=2)
     plt.axvline(mes_strike_price, color='red', linestyle='--', lw=1)
     
