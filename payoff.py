@@ -19,7 +19,7 @@ def plot_combined_payoff_chart():
     vix_short_call_premium = 0.1
     vix_multiplier = 2
     initial_vix_price = 20
-    initial_capital = 3000  # Define your initial capital here
+    initial_capital = 5000
     stock_prices = np.linspace(mes_strike_price * 0.7, mes_strike_price * 1.1, 100)
     
     mes_payoffs = payoff_short_put(mes_strike_price, mes_premium, stock_prices)
@@ -32,9 +32,10 @@ def plot_combined_payoff_chart():
 
     plt.figure(figsize=(10, 6))
     plt.plot(stock_prices, mes_payoffs, label='Short Put on MES @ ' + str(mes_strike_price))
-    plt.plot(stock_prices, combined_vix_payoffs, label='Bear Call VIX @ ' + str(vix_long_call_strike_price) + "/" + str(vix_short_call_strike_price), color='orange')
+    plt.plot(stock_prices, combined_vix_payoffs, label=str(vix_multiplier) + ' x Bear Call VIX @ ' + str(vix_long_call_strike_price) + "/" + str(vix_short_call_strike_price), color='orange')
     plt.plot(stock_prices, combined_payoffs, label='Combined', color='green')
     plt.axhline(0, color='black', lw=2)
+    plt.axvline(mes_strike_price, color='red', linestyle='--', lw=1)
     
     max_loss = np.min(combined_payoffs)
     max_loss_stock_price = stock_prices[np.argmin(combined_payoffs)]
@@ -50,7 +51,6 @@ def plot_combined_payoff_chart():
     breakeven_price = None
     last_call_price = None
     minimum_payoff = 9999
-    last_call = 9999
     for index in range(0, len(combined_payoffs) - 1):
         if combined_payoffs[index] < minimum_payoff and combined_payoffs[index] > 0:
             breakeven_price = stock_prices[index]
@@ -59,13 +59,18 @@ def plot_combined_payoff_chart():
         if stock_prices[index] < breakeven_price  and combined_payoffs[index] < 0:
             last_call_price = stock_prices[index]
     
-    plt.annotate(f'Breakeven: {breakeven_price:.2f}', 
+
+    mes_percent_breakeaven = -((mes_strike_price - breakeven_price) / mes_strike_price) * 100
+    plt.annotate(f'Breakeven: {breakeven_price:.2f} ({mes_percent_breakeaven:.2f}%)', 
                  xy=(breakeven_price, 0), xytext=(breakeven_price, 1000),
                  arrowprops=dict(facecolor='blue', shrink=0.05), fontsize=12, color='blue')
-    plt.annotate(f'Last call: {last_call_price:.2f}', 
-                 xy=(last_call_price, 0), xytext=(last_call_price, -1400),
-                 arrowprops=dict(facecolor='blue', shrink=0.05), 
-                 fontsize=12, color='blue')
+    
+    mes_percent_last_call = -((mes_strike_price - last_call_price) / mes_strike_price) * 100
+    if last_call_price is not None:
+        plt.annotate(f'Last call: {last_call_price:.2f} ({mes_percent_last_call:.2f}%)', 
+                    xy=(last_call_price, 0), xytext=(last_call_price, -1400),
+                    arrowprops=dict(facecolor='blue', shrink=0.05), 
+                    fontsize=12, color='blue')
     
     plt.title('Cassandra\'s Strategy - Initial Capital: ' + str(initial_capital))
     plt.xlabel('MES Stock Price at Expiration')
