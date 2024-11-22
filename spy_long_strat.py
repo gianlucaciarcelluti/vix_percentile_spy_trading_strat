@@ -42,6 +42,11 @@ def fetch_fred_data(series_id, api_key):
 vix_data = fetch_fred_data("VIXCLS", fred_api_key)
 sp500_data = fetch_fred_data("SP500", fred_api_key)
 
+# Save the data and value only to CSV files after purging the NaN values
+# i want purge NaN values and save two columns only: data and value
+vix_data.dropna().to_csv("vix_data.csv", columns=["value"])
+sp500_data.dropna().to_csv("sp500_data.csv", columns=["value"])
+
 # Calculate the overall percentile of each day's VIX value over the dataset
 vix_data["Percentile"] = vix_data["value"].rank(pct=True) * 100
 
