@@ -13,20 +13,25 @@ data['Percent Change'] = data['close'].pct_change() * 100
 # Rimuovi i valori NaN
 data = data.dropna()
 
-# Calcola il percentile del 15%
-left_bound = data['Percent Change'].quantile(0.15)
+# memorizzo la data più vecchia del dataset senza orario
+start_date = pd.to_datetime(data['date']).dt.date.min()
+
+percentile = 0.8
+
+# Calcola il percentile
+left_bound = data['Percent Change'].quantile(1 - percentile)
 
 # Crea un grafico ad istogrammi
 plt.hist(data['Percent Change'], bins=500, edgecolor='blue')
-plt.title('Distribuzione delle variazioni percentuali giornaliere con limite al 85%')
-plt.xlabel('Variazione percentuale')
+plt.title('Distribuzione delle variazioni percentuali giornaliere con limite al ' + str(percentile * 100) + '%')
+plt.xlabel('Variazione percentuale SP500 dal ' + str(start_date))
 plt.ylabel('Frequenza')
 
-# Aggiungi la linea verticale per il confine del 15%
+# Aggiungi la linea verticale per il confine del percentile
 plt.axvline(left_bound, color='red', linestyle='dashed', linewidth=1)
 
 # Aggiungi il valore dell'ascissa in corrispondenza della linea verticale
-plt.text(left_bound, plt.ylim()[1] * 0.85, f'{left_bound:.1f}%', color='red', ha='right')
+plt.text(left_bound, plt.ylim()[1] * percentile, f'{left_bound:.1f}%', color='red', ha='right')
 
 # Calcola il numero di giorni medi in un anno
 total_days = len(data)
