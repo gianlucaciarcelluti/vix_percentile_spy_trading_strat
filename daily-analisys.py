@@ -16,7 +16,7 @@ data = data.dropna()
 # memorizzo la data più vecchia del dataset senza orario
 start_date = pd.to_datetime(data['date']).dt.date.min()
 
-percentile = 0.8
+percentile = 0.78
 
 # Calcola il percentile
 left_bound = data['Percent Change'].quantile(1 - percentile)
@@ -31,7 +31,7 @@ plt.ylabel('Frequenza')
 plt.axvline(left_bound, color='red', linestyle='dashed', linewidth=1)
 
 # Aggiungi il valore dell'ascissa in corrispondenza della linea verticale
-plt.text(left_bound, plt.ylim()[1] * percentile, f'{left_bound:.1f}%', color='red', ha='right')
+plt.text(left_bound, plt.ylim()[1] * percentile, f'{left_bound:.2f}%', color='red', ha='right')
 
 # Calcola il numero di giorni medi in un anno
 total_days = len(data)
