@@ -4,3 +4,4 @@ pandas
 quandl
 requests
 scikit-learn
+scipy
