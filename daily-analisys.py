@@ -16,7 +16,7 @@ data = data.dropna()
 # memorizzo la data più vecchia del dataset senza orario
 start_date = pd.to_datetime(data['date']).dt.date.min()
 
-percentile = 0.78
+percentile = 0.75
 
 # Calcola il percentile
 left_bound = data['Percent Change'].quantile(1 - percentile)
@@ -26,6 +26,9 @@ plt.hist(data['Percent Change'], bins=500, edgecolor='blue')
 plt.title('Distribuzione delle variazioni percentuali giornaliere con limite al ' + str(percentile * 100) + '%')
 plt.xlabel('Variazione percentuale SP500 dal ' + str(start_date))
 plt.ylabel('Frequenza')
+
+# Imposta i tick delle ascisse con intervallo di 1
+plt.xticks(range(int(data['Percent Change'].min()) - 1, int(data['Percent Change'].max()) + 2))
 
 # Aggiungi la linea verticale per il confine del percentile
 plt.axvline(left_bound, color='red', linestyle='dashed', linewidth=1)
