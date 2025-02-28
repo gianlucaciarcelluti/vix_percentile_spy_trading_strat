@@ -249,14 +249,14 @@ class ESPriceDisplay:
             except Exception as e:
                 print(f"Errore nell'aggiornamento UI: {e}")
             
-            # Riduci l'intervallo di aggiornamento a 30 secondi per diminuire le chiamate API
-            time.sleep(30)
+            # Riduci l'intervallo di aggiornamento a 5 minuti per diminuire le chiamate API
+            time.sleep(60 * 5)
     
     def ensure_topmost(self):
         """Assicura che la finestra rimanga sempre in primo piano."""
         self.root.attributes('-topmost', True)
         # Richiama questa funzione ogni 10 secondi
-        self.root.after(10000, self.ensure_topmost)
+        self.root.after(10 * 1000, self.ensure_topmost)
 
 def main():
     root = tk.Tk()
