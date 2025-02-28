@@ -5,3 +5,4 @@ quandl
 requests
 scikit-learn
 scipy
+yfinance
