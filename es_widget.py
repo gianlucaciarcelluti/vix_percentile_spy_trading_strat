@@ -8,6 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.dates as mdates
 import numpy as np
 from datetime import datetime, timedelta
+import argparse  # Importa argparse
 
 def get_es_price():
     try:
@@ -48,7 +49,7 @@ def get_es_daily_data():
         return None
 
 class ESPriceDisplay:
-    def __init__(self, root):
+    def __init__(self, root, show_chart=False):
         self.root = root
         self.root.overrideredirect(True)  # Rimuove bordi e barra del titolo
         self.root.attributes('-topmost', True)  # Mantiene la finestra sempre in primo piano
@@ -98,24 +99,25 @@ class ESPriceDisplay:
         )
         self.pct_label.pack(anchor=tk.W)
         
-        # Frame per il grafico (ora sulla destra)
-        self.chart_frame = tk.Frame(self.horizontal_frame, bg="black")
-        self.chart_frame.pack(side=tk.RIGHT, pady=5)
-        
-        # Inizializza il grafico
-        self.fig, self.ax = plt.subplots(figsize=(1.75, 0.38), facecolor=self.TASKBAR_COLOR)  # Colore della taskbar
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.chart_frame)
-        self.canvas_widget = self.canvas.get_tk_widget()
-        self.canvas_widget.config(highlightthickness=0)  # Rimuove il bordo del canvas
-        self.canvas_widget.pack()
-        
-        # Configura l'aspetto del grafico
-        self.ax.set_facecolor(self.TASKBAR_COLOR)  # Colore della taskbar
-        self.ax.tick_params(axis='x', colors='black', labelsize=6)  # Modificato da 'white' a 'black'
-        self.ax.tick_params(axis='y', colors='black', labelsize=6)  # Modificato da 'white' a 'black'
-        for spine in self.ax.spines.values():
-            spine.set_color('black')  # Modificato da 'white' a 'black'
-            spine.set_linewidth(0.5)
+        if show_chart:
+            # Frame per il grafico (ora sulla destra)
+            self.chart_frame = tk.Frame(self.horizontal_frame, bg="black")
+            self.chart_frame.pack(side=tk.RIGHT, pady=5)
+            
+            # Inizializza il grafico
+            self.fig, self.ax = plt.subplots(figsize=(1.75, 0.38), facecolor=self.TASKBAR_COLOR)  # Colore della taskbar
+            self.canvas = FigureCanvasTkAgg(self.fig, master=self.chart_frame)
+            self.canvas_widget = self.canvas.get_tk_widget()
+            self.canvas_widget.config(highlightthickness=0)  # Rimuove il bordo del canvas
+            self.canvas_widget.pack()
+            
+            # Configura l'aspetto del grafico
+            self.ax.set_facecolor(self.TASKBAR_COLOR)  # Colore della taskbar
+            self.ax.tick_params(axis='x', colors='black', labelsize=6)  # Modificato da 'white' a 'black'
+            self.ax.tick_params(axis='y', colors='black', labelsize=6)  # Modificato da 'white' a 'black'
+            for spine in self.ax.spines.values():
+                spine.set_color('black')  # Modificato da 'white' a 'black'
+                spine.set_linewidth(0.5)
         
         # Aggiunta della funzionalità di trascinamento
         self.main_frame.bind("<ButtonPress-1>", self.start_move)
@@ -130,9 +132,11 @@ class ESPriceDisplay:
         self.pct_label.bind("<ButtonPress-1>", self.start_move)
         self.pct_label.bind("<ButtonRelease-1>", self.stop_move)
         self.pct_label.bind("<B1-Motion>", self.on_motion)
-        self.canvas_widget.bind("<ButtonPress-1>", self.start_move)
-        self.canvas_widget.bind("<ButtonRelease-1>", self.stop_move)
-        self.canvas_widget.bind("<B1-Motion>", self.on_motion)
+        
+        if show_chart:
+            self.canvas_widget.bind("<ButtonPress-1>", self.start_move)
+            self.canvas_widget.bind("<ButtonRelease-1>", self.stop_move)
+            self.canvas_widget.bind("<B1-Motion>", self.on_motion)
         
         # Menu contestuale al click destro
         self.menu = tk.Menu(root, tearoff=0)
@@ -141,7 +145,9 @@ class ESPriceDisplay:
         self.price_frame.bind("<Button-3>", self.show_menu)
         self.price_label.bind("<Button-3>", self.show_menu)
         self.pct_label.bind("<Button-3>", self.show_menu)
-        self.canvas_widget.bind("<Button-3>", self.show_menu)
+        
+        if show_chart:
+            self.canvas_widget.bind("<Button-3>", self.show_menu)
         
         # Avvio thread per aggiornare il prezzo e il grafico
         self.update_thread = threading.Thread(target=self.update_price, daemon=True)
@@ -259,8 +265,12 @@ class ESPriceDisplay:
         self.root.after(10 * 1000, self.ensure_topmost)
 
 def main():
+    parser = argparse.ArgumentParser(description="ES Price Display Widget")
+    parser.add_argument('--show-chart', action='store_true', help="Mostra il grafico")
+    args = parser.parse_args()
+    
     root = tk.Tk()
-    app = ESPriceDisplay(root)
+    app = ESPriceDisplay(root, show_chart=args.show_chart)
     root.mainloop()
 
 if __name__ == "__main__":
