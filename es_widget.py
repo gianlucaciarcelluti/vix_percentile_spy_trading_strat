@@ -16,13 +16,30 @@ def get_es_price():
         time.sleep(0.5)
         
         es = yf.Ticker("ES=F")  # Ticker per il future ES
-        data = es.history(period="1d", interval="1m")
-        if not data.empty:
-            close_price = round(data["Close"].iloc[-1], 2)
-            open_price = round(data["Open"].iloc[0], 2)
-            pct_change = round(((close_price - open_price) / open_price) * 100, 2)
-            print(f"Prezzo recuperato: {close_price}, Apertura: {open_price}, Variazione: {pct_change}%")
+        
+        # Ottieni dati per oggi e il giorno precedente
+        current_data = es.history(period="5d", interval="1d")
+        
+        if len(current_data) >= 2:
+            # Indice -1 è l'ultimo giorno (oggi), indice -2 è il giorno precedente
+            close_price = round(current_data["Close"].iloc[-1], 2)
+            prev_close = round(current_data["Close"].iloc[-2], 2)
+            
+            # Calcola la variazione percentuale rispetto alla chiusura precedente
+            pct_change = round(((close_price - prev_close) / prev_close) * 100, 2)
+            
+            print(f"Prezzo chiusura: {close_price}, Chiusura precedente: {prev_close}, Variazione: {pct_change}%")
             return close_price, pct_change
+        
+        # Se non ci sono abbastanza dati, usa la variazione intraday
+        if not current_data.empty:
+            close_price = round(current_data["Close"].iloc[-1], 2)
+            open_price = round(current_data["Open"].iloc[-1], 2)
+            pct_change = round(((close_price - open_price) / open_price) * 100, 2)
+            
+            print(f"Prezzo chiusura: {close_price}, Apertura: {open_price}, Variazione intraday: {pct_change}%")
+            return close_price, pct_change
+            
         print("Dati vuoti nella risposta API")
         return "N/A", 0.0
     except Exception as e:
@@ -196,6 +213,10 @@ class ESPriceDisplay:
     def update_chart(self, data):
         if data is None or data.empty:
             print("Nessun dato disponibile per aggiornare il grafico")
+            return
+        
+        # Verifica se il grafico è stato inizializzato
+        if not hasattr(self, 'ax') or data is None or data.empty:
             return
         
         self.ax.clear()
