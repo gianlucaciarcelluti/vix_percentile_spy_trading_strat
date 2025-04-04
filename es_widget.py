@@ -28,7 +28,7 @@ def get_es_price():
             # Calcola la variazione percentuale rispetto alla chiusura precedente
             pct_change = round(((close_price - prev_close) / prev_close) * 100, 2)
             
-            print(f"Prezzo chiusura: {close_price}, Chiusura precedente: {prev_close}, Variazione: {pct_change}%")
+            print(f"Prezzo chiusura ES: {close_price}, Chiusura precedente: {prev_close}, Variazione: {pct_change}%")
             return close_price, pct_change
         
         # Se non ci sono abbastanza dati, usa la variazione intraday
@@ -37,13 +37,49 @@ def get_es_price():
             open_price = round(current_data["Open"].iloc[-1], 2)
             pct_change = round(((close_price - open_price) / open_price) * 100, 2)
             
-            print(f"Prezzo chiusura: {close_price}, Apertura: {open_price}, Variazione intraday: {pct_change}%")
+            print(f"Prezzo chiusura ES: {close_price}, Apertura: {open_price}, Variazione intraday: {pct_change}%")
             return close_price, pct_change
             
-        print("Dati vuoti nella risposta API")
+        print("Dati ES vuoti nella risposta API")
         return "N/A", 0.0
     except Exception as e:
-        print(f"Errore nel recupero del prezzo: {e}")
+        print(f"Errore nel recupero del prezzo ES: {e}")
+        return "Error", 0.0
+
+def get_spx_price():
+    try:
+        # Aggiungi un ritardo casuale per evitare limiti di API
+        time.sleep(0.5)
+        
+        spx = yf.Ticker("^GSPC")  # Ticker per l'indice SPX
+        
+        # Ottieni dati per oggi e il giorno precedente
+        current_data = spx.history(period="5d", interval="1d")
+        
+        if len(current_data) >= 2:
+            # Indice -1 è l'ultimo giorno (oggi), indice -2 è il giorno precedente
+            close_price = round(current_data["Close"].iloc[-1], 2)
+            prev_close = round(current_data["Close"].iloc[-2], 2)
+            
+            # Calcola la variazione percentuale rispetto alla chiusura precedente
+            pct_change = round(((close_price - prev_close) / prev_close) * 100, 2)
+            
+            print(f"Prezzo chiusura SPX: {close_price}, Chiusura precedente: {prev_close}, Variazione: {pct_change}%")
+            return close_price, pct_change
+        
+        # Se non ci sono abbastanza dati, usa la variazione intraday
+        if not current_data.empty:
+            close_price = round(current_data["Close"].iloc[-1], 2)
+            open_price = round(current_data["Open"].iloc[-1], 2)
+            pct_change = round(((close_price - open_price) / open_price) * 100, 2)
+            
+            print(f"Prezzo chiusura SPX: {close_price}, Apertura: {open_price}, Variazione intraday: {pct_change}%")
+            return close_price, pct_change
+            
+        print("Dati SPX vuoti nella risposta API")
+        return "N/A", 0.0
+    except Exception as e:
+        print(f"Errore nel recupero del prezzo SPX: {e}")
         return "Error", 0.0
 
 def get_es_daily_data():
@@ -92,29 +128,65 @@ class ESPriceDisplay:
         # Costante per il colore della taskbar di Windows
         self.TASKBAR_COLOR = "#F1F1F1"  # Un grigio chiaro che si avvicina al colore della taskbar di Windows 10/11
 
-        # Label per il prezzo - Cambio sfondo al colore della taskbar
+        # Custom font
         self.custom_font = font.Font(family="Arial", size=10, weight="bold")
+        self.pct_font = font.Font(family="Arial", size=8)
+
+        # Frame per ES (prima riga)
+        self.es_frame = tk.Frame(self.price_frame, bg=self.TASKBAR_COLOR)
+        self.es_frame.pack(fill=tk.X, anchor=tk.W)
+        
+        # Label per il prezzo ES (sulla stessa riga della percentuale)
         self.price_label = tk.Label(
-            self.price_frame, 
+            self.es_frame, 
             text="ES: Loading...", 
-            fg="#333333",  # Grigio scuro per il testo
-            bg=self.TASKBAR_COLOR,  # Colore della taskbar
+            fg="#333333",
+            bg=self.TASKBAR_COLOR,
             font=self.custom_font,
             padx=5,
             pady=2
         )
-        self.price_label.pack(anchor=tk.W)
+        self.price_label.pack(side=tk.LEFT)
         
-        # Label per la variazione percentuale
+        # Label per la variazione percentuale ES (sulla stessa riga del prezzo)
         self.pct_label = tk.Label(
-            self.price_frame, 
+            self.es_frame, 
             text="0.00%", 
-            fg="#333333",  # Grigio scuro per default
-            bg=self.TASKBAR_COLOR,  # Colore della taskbar
-            font=font.Font(family="Arial", size=8),
-            padx=5
+            fg="#333333",
+            bg=self.TASKBAR_COLOR,
+            font=self.pct_font,
+            padx=5,
+            pady=2
         )
-        self.pct_label.pack(anchor=tk.W)
+        self.pct_label.pack(side=tk.LEFT)
+
+        # Frame per SPX (seconda riga)
+        self.spx_frame = tk.Frame(self.price_frame, bg=self.TASKBAR_COLOR)
+        self.spx_frame.pack(fill=tk.X, anchor=tk.W)
+        
+        # Label per il prezzo SPX
+        self.spx_price_label = tk.Label(
+            self.spx_frame, 
+            text="SPX: Loading...", 
+            fg="#333333",
+            bg=self.TASKBAR_COLOR,
+            font=self.custom_font,
+            padx=5,
+            pady=2
+        )
+        self.spx_price_label.pack(side=tk.LEFT)
+        
+        # Label per la variazione percentuale SPX
+        self.spx_pct_label = tk.Label(
+            self.spx_frame, 
+            text="0.00%", 
+            fg="#333333",
+            bg=self.TASKBAR_COLOR,
+            font=self.pct_font,
+            padx=5,
+            pady=2
+        )
+        self.spx_pct_label.pack(side=tk.LEFT)
         
         if show_chart:
             # Frame per il grafico (ora sulla destra)
@@ -122,7 +194,7 @@ class ESPriceDisplay:
             self.chart_frame.pack(side=tk.RIGHT, pady=5)
             
             # Inizializza il grafico
-            self.fig, self.ax = plt.subplots(figsize=(1.75, 0.38), facecolor=self.TASKBAR_COLOR)  # Colore della taskbar
+            self.fig, self.ax = plt.subplots(figsize=(1.75, 0.75), facecolor=self.TASKBAR_COLOR)  # Aumentata altezza per due righe
             self.canvas = FigureCanvasTkAgg(self.fig, master=self.chart_frame)
             self.canvas_widget = self.canvas.get_tk_widget()
             self.canvas_widget.config(highlightthickness=0)  # Rimuove il bordo del canvas
@@ -143,12 +215,28 @@ class ESPriceDisplay:
         self.price_frame.bind("<ButtonPress-1>", self.start_move)
         self.price_frame.bind("<ButtonRelease-1>", self.stop_move)
         self.price_frame.bind("<B1-Motion>", self.on_motion)
+        
+        # Bind ES frame
+        self.es_frame.bind("<ButtonPress-1>", self.start_move)
+        self.es_frame.bind("<ButtonRelease-1>", self.stop_move)
+        self.es_frame.bind("<B1-Motion>", self.on_motion)
         self.price_label.bind("<ButtonPress-1>", self.start_move)
         self.price_label.bind("<ButtonRelease-1>", self.stop_move)
         self.price_label.bind("<B1-Motion>", self.on_motion)
         self.pct_label.bind("<ButtonPress-1>", self.start_move)
         self.pct_label.bind("<ButtonRelease-1>", self.stop_move)
         self.pct_label.bind("<B1-Motion>", self.on_motion)
+        
+        # Bind SPX frame
+        self.spx_frame.bind("<ButtonPress-1>", self.start_move)
+        self.spx_frame.bind("<ButtonRelease-1>", self.stop_move)
+        self.spx_frame.bind("<B1-Motion>", self.on_motion)
+        self.spx_price_label.bind("<ButtonPress-1>", self.start_move)
+        self.spx_price_label.bind("<ButtonRelease-1>", self.stop_move)
+        self.spx_price_label.bind("<B1-Motion>", self.on_motion)
+        self.spx_pct_label.bind("<ButtonPress-1>", self.start_move)
+        self.spx_pct_label.bind("<ButtonRelease-1>", self.stop_move)
+        self.spx_pct_label.bind("<B1-Motion>", self.on_motion)
         
         if show_chart:
             self.canvas_widget.bind("<ButtonPress-1>", self.start_move)
@@ -160,8 +248,12 @@ class ESPriceDisplay:
         self.menu.add_command(label="Esci", command=self.exit_app)
         self.main_frame.bind("<Button-3>", self.show_menu)
         self.price_frame.bind("<Button-3>", self.show_menu)
+        self.es_frame.bind("<Button-3>", self.show_menu)
+        self.spx_frame.bind("<Button-3>", self.show_menu)
         self.price_label.bind("<Button-3>", self.show_menu)
         self.pct_label.bind("<Button-3>", self.show_menu)
+        self.spx_price_label.bind("<Button-3>", self.show_menu)
+        self.spx_pct_label.bind("<Button-3>", self.show_menu)
         
         if show_chart:
             self.canvas_widget.bind("<Button-3>", self.show_menu)
@@ -183,7 +275,7 @@ class ESPriceDisplay:
         
         # Calcola posizione per essere vicino alla taskbar
         window_width = 196  # Larghezza ridotta del 30% (da 280 a 196)
-        window_height = 48  # Altezza mantenuta uguale
+        window_height = 60  # Altezza aumentata per le due righe
         x_position = screen_width - window_width - 10
         y_position = screen_height - window_height - 10
         
@@ -259,16 +351,25 @@ class ESPriceDisplay:
     def update_price(self):
         while True:
             try:
-                # Aggiorna il prezzo corrente e la variazione
-                price, pct_change = get_es_price()
-                self.price_label.config(text=f"ES: {price}")
+                # Aggiorna il prezzo corrente e la variazione di ES
+                es_price, es_pct_change = get_es_price()
+                self.price_label.config(text=f"ES: {es_price}")
                 
-                print(f"Aggiornamento UI: prezzo={price}, variazione={pct_change}%")
+                # Imposta il colore in base alla variazione per ES
+                es_color = "darkgreen" if es_pct_change >= 0 else "darkred"
+                es_sign = "+" if es_pct_change > 0 else ""
+                self.pct_label.config(text=f"{es_sign}{es_pct_change}%", fg=es_color)
                 
-                # Imposta il colore in base alla variazione
-                color = "darkgreen" if pct_change >= 0 else "darkred"  # Colori più scuri per maggiore leggibilità
-                sign = "+" if pct_change > 0 else ""
-                self.pct_label.config(text=f"{sign}{pct_change}%", fg=color, bg=self.TASKBAR_COLOR)
+                # Aggiorna il prezzo corrente e la variazione di SPX
+                spx_price, spx_pct_change = get_spx_price()
+                self.spx_price_label.config(text=f"SPX: {spx_price}")
+                
+                # Imposta il colore in base alla variazione per SPX
+                spx_color = "darkgreen" if spx_pct_change >= 0 else "darkred"
+                spx_sign = "+" if spx_pct_change > 0 else ""
+                self.spx_pct_label.config(text=f"{spx_sign}{spx_pct_change}%", fg=spx_color)
+                
+                print(f"Aggiornamento UI: ES={es_price} ({es_pct_change}%), SPX={spx_price} ({spx_pct_change}%)")
                 
                 # Aggiorna il grafico ogni minuto
                 data = get_es_daily_data()
