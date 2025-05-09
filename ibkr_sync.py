@@ -6,7 +6,7 @@ from datetime import datetime
 # Configurazioni
 IB_HOST = '127.0.0.1'
 IB_PORT = 4002   # Usa 4001 se IB Gateway
-DB_CONN = "dbname=ibkr user=postgres password=H3mX5x1TxP09lbI host=130.185.118.107 port=30007"
+DB_CONN = "dbname=dbname user=unsername password=password host=localhost port=5432"
 
 def connect_ib():
     ib = IB()

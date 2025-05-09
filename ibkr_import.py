@@ -5,7 +5,7 @@ import csv
 from io import StringIO
 
 # CONFIGURA QUI LA TUA CONNESSIONE
-DB_URI = "postgresql://postgres:H3mX5x1TxP09lbI@130.185.118.107:30007/ibkr"
+DB_URI = "postgresql://username:password@localhost:5432/db_name"
 CSV_PATH = "data/ibkr/U15963464_20250101_20250508.csv"
 
 # Leggi tutto il CSV come testo
