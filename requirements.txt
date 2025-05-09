@@ -1,8 +1,11 @@
 fredapi
+ib_insync
 matplotlib
 pandas
+psycopg2-binary
 quandl
 requests
 scikit-learn
 scipy
+sqlalchemy
 yfinance
